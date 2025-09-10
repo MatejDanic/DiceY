@@ -1,0 +1,13 @@
+﻿using DiceY.Domain.Entities;
+using DiceY.Domain.Interfaces;
+using DiceY.Domain.Primitives;
+
+namespace DiceY.Variants.Shared.Policies;
+
+public sealed class BottomUp : IOrderPolicy
+{
+    public bool CanScore(IReadOnlyList<Category> categories, CategoryKey categoryKey)
+    {
+        throw new NotImplementedException();
+    }
+}

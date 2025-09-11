@@ -6,4 +6,17 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Folder Include="Balut\" />
+    <Folder Include="Kniffel\" />
+    <Folder Include="Generala\" />
+    <Folder Include="Crab\" />
+    <Folder Include="Yatzy\" />
+    <Folder Include="Yacht\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\DiceY.Domain\DiceY.Domain.csproj" />
+  </ItemGroup>
+
 </Project>

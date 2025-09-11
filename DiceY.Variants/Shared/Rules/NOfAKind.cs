@@ -3,7 +3,7 @@ using DiceY.Domain.Interfaces;
 
 namespace DiceY.Variants.Shared.Rules;
 
-public sealed class NOfAKind : IScoringRUle
+public sealed class NOfAKind : IScoringRule
 {
     private readonly int _n;
     private readonly int _bonus;

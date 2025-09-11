@@ -8,8 +8,8 @@ public interface IGameEngine<TState> where TState : IGameState
     int DiceCount { get; }
     int DiceSides { get; }
     int MaxRollCount { get; }
-    ImmutableArray<CategoryKey> CategoryOrder { get; }
-    SortedSet<ColumnKey> ColumnOrder { get; }
+    IReadOnlyList<CategoryKey> CategoryOrder { get; }
+    IReadOnlyList<ColumnKey> ColumnOrder { get; }
     IReadOnlyDictionary<ColumnKey, IOrderPolicy> Policies { get; }
     IReadOnlyDictionary<CategoryKey, IScoringRule> Rules { get; }
     TState Create();

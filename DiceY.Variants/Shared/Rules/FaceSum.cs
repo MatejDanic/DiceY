@@ -3,7 +3,7 @@ using DiceY.Domain.Interfaces;
 
 namespace DiceY.Variants.Shared.Rules;
 
-public sealed class FaceSum : IScoringRUle
+public sealed class FaceSum : IScoringRule
 {
     private readonly int _face;
     public FaceSum(int face)

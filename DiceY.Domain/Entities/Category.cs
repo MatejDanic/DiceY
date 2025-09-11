@@ -8,20 +8,23 @@ public sealed class Category
 {
     public CategoryKey Key { get; }
     private readonly IScoringRule _rule;
-    public int? Score { get; private set; }
+    public int? Score { get; }
 
-    public Category(CategoryKey key, IScoringRule rule)
+    public Category(CategoryKey key, IScoringRule rule, int? score = null)
     {
         ArgumentNullException.ThrowIfNull(key, nameof(key));
         ArgumentNullException.ThrowIfNull(rule, nameof(rule));
         Key = key;
         _rule = rule;
+        Score = score;
     }
 
-    public void Fill(IReadOnlyList<Die> dice)
+    public Category Fill(IReadOnlyList<Die> dice)
     {
-        if (Score.HasValue) throw new CategoryAlreadyScoredException(Key);
-        Score = _rule.GetScore(dice);
-        throw new NotImplementedException();
+        if (Score.HasValue)
+            throw new CategoryAlreadyScoredException(Key);
+
+        var newScore = _rule.GetScore(dice);
+        return new Category(Key, _rule, newScore);
     }
 }

@@ -3,7 +3,7 @@ using DiceY.Domain.Interfaces;
 
 namespace DiceY.Variants.Shared.Rules;
 
-public sealed class Straight : IScoringRUle
+public sealed class Straight : IScoringRule
 {
     private readonly int _n;
     private readonly int _bonus;

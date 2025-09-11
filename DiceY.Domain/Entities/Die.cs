@@ -5,7 +5,7 @@ namespace DiceY.Domain.Entities;
 public sealed class Die
 {
     private readonly int _sides;
-    public int Value { get; private set; }
+    public int Value { get; }
 
     public Die(int sides = 6, int value = 6)
     {
@@ -16,8 +16,9 @@ public sealed class Die
         Value = value;
     }
 
-    public void Roll(IRollService rng)
+    public Die Roll(IRollService rng)
     {
-        Value = rng.NextRoll(_sides);
+        var newValue = rng.NextRoll(_sides);
+        return new Die(_sides, newValue);
     }
 }

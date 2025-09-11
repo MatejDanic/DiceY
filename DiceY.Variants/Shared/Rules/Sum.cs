@@ -3,7 +3,7 @@ using DiceY.Domain.Interfaces;
 
 namespace DiceY.Variants.Shared.Rules;
 
-public sealed class Sum : IScoringRUle
+public sealed class Sum : IScoringRule
 {
     public int GetScore(IReadOnlyList<Die> dice)
     {

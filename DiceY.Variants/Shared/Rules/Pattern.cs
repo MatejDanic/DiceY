@@ -3,7 +3,7 @@ using DiceY.Domain.Interfaces;
 
 namespace DiceY.Variants.Shared.Rules;
 
-public sealed class Pattern : IScoringRUle
+public sealed class Pattern : IScoringRule
 {
     private readonly IReadOnlyDictionary<ISet<int>, int> _patterns;
 

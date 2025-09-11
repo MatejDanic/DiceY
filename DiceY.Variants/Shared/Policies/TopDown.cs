@@ -6,7 +6,7 @@ namespace DiceY.Variants.Shared.Policies;
 
 public sealed class TopDown : IOrderPolicy
 {
-    public bool CanScore(IReadOnlyList<Category> categories, CategoryKey categoryKey)
+    public bool CanFill(IReadOnlyList<Category> categories, CategoryKey categoryKey)
     {
         throw new NotImplementedException();
     }

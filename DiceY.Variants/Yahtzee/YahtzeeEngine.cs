@@ -1,10 +1,13 @@
-﻿using DiceY.Domain.Entities;
+﻿using DiceY.Domain.Delegates;
+using DiceY.Domain.Entities;
 using DiceY.Domain.Interfaces;
 using DiceY.Domain.Primitives;
-using DiceY.Variants.Shared.Rules;
-using DiceY.Domain.Delegates;
 using DiceY.Variants.Shared.Policies;
+using DiceY.Variants.Shared.Rules;
 using System.Collections.Immutable;
+using System.Data;
+using System.Threading;
+using System.Threading.Channels;
 
 namespace DiceY.Variants.Yahtzee;
 
@@ -13,15 +16,21 @@ public sealed class YahtzeeEngine : IGameEngine<YahtzeeState>
     public IRollService Rng => _rng;
     public int DiceCount => _diceCount;
     public int MaxRollCount { get; } = 3;
+    public int DiceSides { get; } = 6;
+    public IReadOnlyList<CategoryKey> CategoryOrder => _categoryOrder;
+    public IReadOnlyList<ColumnKey> ColumnOrder => _columnOrder;
+    public IReadOnlyDictionary<ColumnKey, IOrderPolicy> Policies => _policies;
+    public IReadOnlyDictionary<CategoryKey, IScoringRule> Rules => _rules;
 
-    private const int _minDiceCount = 5;
-    private const int _maxDiceCount = 6;
     private readonly int _diceCount;
     private readonly IRollService _rng;
 
+    private const int _minDiceCount = 5;
+    private const int _maxDiceCount = 6;
+
     public YahtzeeEngine(IRollService rng, int diceCount = 5)
     {
-        ArgumentNullException.ThrowIfNull(nameof(rng));
+        ArgumentNullException.ThrowIfNull(rng, nameof(rng));
         ArgumentOutOfRangeException.ThrowIfLessThan(diceCount, _minDiceCount);
         ArgumentOutOfRangeException.ThrowIfGreaterThan(diceCount, _maxDiceCount);
         _rng = rng;
@@ -44,50 +53,47 @@ public sealed class YahtzeeEngine : IGameEngine<YahtzeeState>
     private static readonly CategoryKey _yahtzee = new("yahtzee");
     private static readonly CategoryKey _chance = new("chance");
 
-    private static readonly IReadOnlyList<CategoryKey> _topSection = [_ones, _twos, _threes, _fours, _fives, _sixes];
-    private static readonly IReadOnlyList<CategoryKey> _bottomSection = [_threeOfAKind, _fourOfAKind, _fullHouse, _smallStraight, _largeStraight, _yahtzee, _chance];
+    private static readonly ImmutableArray<CategoryKey> _topSection = [_ones, _twos, _threes, _fours, _fives, _sixes];
 
-    public SortedSet<ColumnKey> Columns = [_main];
-    public SortedSet<CategoryKey> CategoryKeys = [_ones, _twos, _threes, _fours, _fives, _sixes, _threeOfAKind, _fourOfAKind, _fullHouse, _smallStraight, _largeStraight, _yahtzee, _chance];
+    private static readonly ImmutableArray<CategoryKey> _bottomSection = [_threeOfAKind, _fourOfAKind, _fullHouse, _smallStraight, _largeStraight, _yahtzee, _chance];
 
-    private const int _topSectionBonus = 35;
-    private const int _topSectionBonusThreshold = 63;
+    private static readonly ImmutableArray<CategoryKey> _allCategories = _topSection.AddRange(_bottomSection);
+
+    private static readonly ImmutableArray<ColumnKey> _columns = [_main];
+
+    private readonly ImmutableArray<CategoryKey> _categoryOrder = _allCategories;
+    private readonly ImmutableArray<ColumnKey> _columnOrder = _columns;
+
+    private readonly ImmutableDictionary<ColumnKey, IOrderPolicy> _policies = ImmutableDictionary<ColumnKey, IOrderPolicy>.Empty.Add(_main, new Free());
 
     private const int _fullHouseScore = 25;
     private const int _smallStraightScore = 30;
     private const int _largeStraightScore = 40;
     private const int _yahtzeeScore = 50;
 
-    public IReadOnlyDictionary<ColumnKey, IOrderPolicy> Policies => throw new NotImplementedException();
-
-    public IReadOnlyDictionary<CategoryKey, IScoringRule> Rules => new Dictionary<CategoryKey, IScoringRule>
-    {
-        [_ones] = new FaceSum(1),
-        [_twos] = new FaceSum(2),
-        [_threes] = new FaceSum(3),
-        [_fours] = new FaceSum(4),
-        [_fives] = new FaceSum(5),
-        [_sixes] = new FaceSum(6),
-        [_threeOfAKind] = new NOfAKind(3),
-        [_fourOfAKind] = new NOfAKind(4),
-        [_fullHouse] = new FullHouse(0, _fullHouseScore),
-        [_smallStraight] = new Straight(4, _smallStraightScore),
-        [_largeStraight] = new Straight(5, _largeStraightScore),
-        [_yahtzee] = new NOfAKind(5, 0, _yahtzeeScore),
-        [_chance] = new Sum()
-    };
-
-    public int DiceSides => throw new NotImplementedException();
-
-    public int GetTotalScore => throw new NotImplementedException();
-
+    private readonly ImmutableDictionary<CategoryKey, IScoringRule> _rules = ImmutableDictionary.CreateRange(
+        [
+            new KeyValuePair<CategoryKey, IScoringRule>(_ones, new FaceSum(1)),
+            new KeyValuePair<CategoryKey, IScoringRule>(_twos, new FaceSum(2)),
+            new KeyValuePair<CategoryKey, IScoringRule>(_threes, new FaceSum(3)),
+            new KeyValuePair<CategoryKey, IScoringRule>(_fours, new FaceSum(4)),
+            new KeyValuePair<CategoryKey, IScoringRule>(_fives, new FaceSum(5)),
+            new KeyValuePair<CategoryKey, IScoringRule>(_sixes, new FaceSum(6)),
+            new KeyValuePair<CategoryKey, IScoringRule>(_threeOfAKind, new NOfAKind(3)),
+            new KeyValuePair<CategoryKey, IScoringRule>(_fourOfAKind, new NOfAKind(4)),
+            new KeyValuePair<CategoryKey, IScoringRule>(_fullHouse, new FullHouse(0, _fullHouseScore)),
+            new KeyValuePair<CategoryKey, IScoringRule>(_smallStraight, new Straight(4, _smallStraightScore)),
+            new KeyValuePair<CategoryKey, IScoringRule>(_largeStraight, new Straight(5, _largeStraightScore)),
+            new KeyValuePair<CategoryKey, IScoringRule>(_yahtzee, new NOfAKind(5, 0, _yahtzeeScore)),
+            new KeyValuePair<CategoryKey, IScoringRule>(_chance, new Sum())
+        ]);
 
     public YahtzeeState Create()
     {
-        var dice = Enumerable.Range(0, DiceCount).Select(_ => new Die(DiceSides)).ToList();
-        var categories = CategoryKeys.Select(c => new Category(c, Rules[c])).ToImmutableSortedSet();
+        var dice = Enumerable.Range(0, DiceCount).Select(_ => new Die(DiceSides)).ToImmutableArray();
+        var categories = _categoryOrder.Select(k => new Category(k, _rules[k])).ToImmutableArray();
         var column = new Column(_main, new Free(), _calculateScore, categories);
-        return new YahtzeeState(dice, column);
+        return new YahtzeeState(dice, [column]);
     }
 
     public YahtzeeState Reduce(YahtzeeState state, IGameCommand<YahtzeeState> action)
@@ -95,7 +101,10 @@ public sealed class YahtzeeEngine : IGameEngine<YahtzeeState>
         throw new NotImplementedException();
     }
 
-    private CalculateScore _calculateScore = (IReadOnlyList<Category> categories) =>
+    private const int _topSectionBonus = 35;
+    private const int _topSectionBonusThreshold = 63;
+
+    private readonly CalculateScore _calculateScore = (IReadOnlyList<Category> categories) =>
     {
         int topSectionSum = categories.Where(c => c.Score.HasValue && _topSection.Contains(c.Key)).Sum(c => c.Score ?? 0);
         int bottomSectionSum = categories.Where(c => c.Score.HasValue && _bottomSection.Contains(c.Key)).Sum(c => c.Score ?? 0);

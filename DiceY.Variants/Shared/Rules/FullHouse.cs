@@ -3,7 +3,7 @@ using DiceY.Domain.Interfaces;
 
 namespace DiceY.Variants.Shared.Rules;
 
-public sealed class FullHouse : IScoringRUle
+public sealed class FullHouse : IScoringRule
 {
     private readonly int _bonus;
     private readonly int _fixedScore;

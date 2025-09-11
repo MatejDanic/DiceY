@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DiceY.Domain.Tests", "DiceY
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DiceY.Variants.Tests", "DiceY.Variants.Tests\DiceY.Variants.Tests.csproj", "{47B94F0E-29EC-356E-FDAE-6A405494A378}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DiceY.TestUtil", "DiceY.TestUtil\DiceY.TestUtil.csproj", "{F92418E1-FE38-4800-BD77-15FDD59DFC0E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{47B94F0E-29EC-356E-FDAE-6A405494A378}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{47B94F0E-29EC-356E-FDAE-6A405494A378}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{47B94F0E-29EC-356E-FDAE-6A405494A378}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F92418E1-FE38-4800-BD77-15FDD59DFC0E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F92418E1-FE38-4800-BD77-15FDD59DFC0E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F92418E1-FE38-4800-BD77-15FDD59DFC0E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F92418E1-FE38-4800-BD77-15FDD59DFC0E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

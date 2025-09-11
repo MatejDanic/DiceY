@@ -1,6 +1,7 @@
 ﻿using DiceY.Domain.Entities;
 using DiceY.Domain.Interfaces;
 using DiceY.Domain.Primitives;
+
 namespace DiceY.Variants.Yamb;
 
 public sealed class YambEngine(IRollService rng, int diceCount = 5, int diceSides = 6) : IGameEngine<YambState>

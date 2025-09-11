@@ -18,6 +18,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\DiceY.Domain\DiceY.Domain.csproj" />
+    <ProjectReference Include="..\DiceY.TestUtil\DiceY.TestUtil.csproj" />
   </ItemGroup>
 
   <ItemGroup>

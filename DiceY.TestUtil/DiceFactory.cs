@@ -1,6 +1,6 @@
-﻿using Yamb.Domain.Entities;
+﻿using DiceY.Domain.Entities;
 
-namespace Yamb.TestUtil;
+namespace DiceY.TestUtil;
 
 public sealed class DiceFactory
 {

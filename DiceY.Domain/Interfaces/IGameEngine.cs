@@ -1,17 +1,11 @@
 ﻿using DiceY.Domain.Primitives;
+using DiceY.Domain.ValueObjects;
 
 namespace DiceY.Domain.Interfaces;
 
 public interface IGameEngine<TState> where TState : IGameState
 {
-    IRollService Rng { get; }
-    int DiceCount { get; }
-    int DiceSides { get; }
-    int MaxRollCount { get; }
-    IReadOnlyList<CategoryKey> CategoryOrder { get; }
-    IReadOnlyList<ColumnKey> ColumnOrder { get; }
-    IReadOnlyDictionary<ColumnKey, IOrderPolicy> Policies { get; }
-    IReadOnlyDictionary<CategoryKey, IScoringRule> Rules { get; }
+    GameConfig Config { get; }
     TState Create();
     TState Reduce(TState state, IGameCommand<TState> action);
 }

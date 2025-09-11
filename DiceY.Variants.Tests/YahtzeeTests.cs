@@ -1,13 +1,12 @@
-﻿using Yamb.Domain.Interfaces;
-using Yamb.TestUtil;
-using Yamb.Variants.Yahtzee;
-using Yamb.Variants.Yahtzee.Commands;
+﻿using DiceY.Domain.Interfaces;
+using DiceY.TestUtil;
+using DiceY.Variants.Yahtzee;
 
-namespace Yamb.Variants.UnitTests;
+namespace DiceY.Variants.Tests;
 
 public sealed class YahtzeeTests
 {
-    private static YahtzeeRuleset CreateRuleset(IRollService rng = null, YahtzeeConfig cfg = null) => new(rng ?? new FixedRollService([]), cfg ?? YahtzeeConfig.Default());
+    private static YahtzeeEngine CreateRuleset(IRollService rng = null, YahtzeeConfig cfg = null) => new(rng ?? new FixedRollService([]), cfg ?? YahtzeeConfig.Default());
 
     private static YahtzeeState WithDice(YahtzeeState s, params int[] values) =>
         s with { Dice = DiceFactory.D6(values) };

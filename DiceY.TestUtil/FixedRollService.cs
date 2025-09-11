@@ -1,6 +1,6 @@
-﻿using Yamb.Domain.Interfaces;
+﻿using DiceY.Domain.Interfaces;
 
-namespace Yamb.TestUtil;
+namespace DiceY.TestUtil;
 
 public sealed class FixedRollService(IEnumerable<int> values) : IRollService
 {

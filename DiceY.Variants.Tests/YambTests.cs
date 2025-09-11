@@ -1,11 +1,10 @@
-﻿using Yamb.Domain.Entities;
-using Yamb.Domain.Interfaces;
-using Yamb.Domain.Primitives;
-using Yamb.TestUtil;
-using Yamb.Variants.Yamb;
-using Yamb.Variants.Yamb.Commands;
+﻿using DiceY.Domain.Entities;
+using DiceY.Domain.Interfaces;
+using DiceY.Domain.Primitives;
+using DiceY.TestUtil;
+using DiceY.Variants.Yamb;
 
-namespace Yamb.Variants.UnitTests;
+namespace DiceY.Variants.Tests;
 
 public sealed class YambTests
 {

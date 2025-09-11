@@ -1,6 +1,6 @@
 ﻿namespace DiceY.Domain.Primitives;
 
-public readonly record struct CategoryKey(String Key)
+public readonly record struct CategoryKey(String Value)
 {
-    public override string ToString() => Key;
+    public override string ToString() => Value;
 }

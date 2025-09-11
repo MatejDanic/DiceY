@@ -5,22 +5,13 @@ using DiceY.Domain.Primitives;
 using DiceY.Variants.Shared.Policies;
 using DiceY.Variants.Shared.Rules;
 using System.Collections.Immutable;
-using System.Data;
-using System.Threading;
-using System.Threading.Channels;
 
 namespace DiceY.Variants.Yahtzee;
 
 public sealed class YahtzeeEngine : IGameEngine<YahtzeeState>
 {
-    public IRollService Rng => _rng;
-    public int DiceCount => _diceCount;
-    public int MaxRollCount { get; } = 3;
-    public int DiceSides { get; } = 6;
-    public IReadOnlyList<CategoryKey> CategoryOrder => _categoryOrder;
-    public IReadOnlyList<ColumnKey> ColumnOrder => _columnOrder;
-    public IReadOnlyDictionary<ColumnKey, IOrderPolicy> Policies => _policies;
-    public IReadOnlyDictionary<CategoryKey, IScoringRule> Rules => _rules;
+    private readonly int _maxRollCount = 3;
+    private readonly int _diceSides = 6;
 
     private readonly int _diceCount;
     private readonly IRollService _rng;
@@ -90,7 +81,7 @@ public sealed class YahtzeeEngine : IGameEngine<YahtzeeState>
 
     public YahtzeeState Create()
     {
-        var dice = Enumerable.Range(0, DiceCount).Select(_ => new Die(DiceSides)).ToImmutableArray();
+        var dice = Enumerable.Range(0, _diceCount).Select(_ => new Die(_diceSides)).ToImmutableArray();
         var categories = _categoryOrder.Select(k => new Category(k, _rules[k])).ToImmutableArray();
         var column = new Column(_main, new Free(), _calculateScore, categories);
         return new YahtzeeState(dice, [column]);
@@ -98,6 +89,7 @@ public sealed class YahtzeeEngine : IGameEngine<YahtzeeState>
 
     public YahtzeeState Reduce(YahtzeeState state, IGameCommand<YahtzeeState> action)
     {
+        // implementation
         throw new NotImplementedException();
     }
 
@@ -110,16 +102,5 @@ public sealed class YahtzeeEngine : IGameEngine<YahtzeeState>
         int bottomSectionSum = categories.Where(c => c.Score.HasValue && _bottomSection.Contains(c.Key)).Sum(c => c.Score ?? 0);
         return topSectionSum + (topSectionSum >= _topSectionBonusThreshold ? _topSectionBonus : 0) + bottomSectionSum;
     };
-
-    private Die[] Roll(IReadOnlyList<Die> dice, int mask)
-    {
-        var arr = dice.ToArray();
-        int maxMask = (1 << arr.Length) - 1;
-        if ((mask & ~maxMask) != 0) throw new ArgumentOutOfRangeException(nameof(mask));
-        for (int i = 0; i < arr.Length; i++)
-            if ((mask >> i & 1) == 1)
-                arr[i].Roll(_rng);
-        return arr;
-    }
     
 }

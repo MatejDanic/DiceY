@@ -17,6 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\DiceY.TestUtil\DiceY.TestUtil.csproj" />
     <ProjectReference Include="..\DiceY.Variants\DiceY.Variants.csproj" />
   </ItemGroup>
 

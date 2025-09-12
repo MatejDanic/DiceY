@@ -2,4 +2,4 @@
 
 namespace DiceY.Domain.Exceptions;
 
-internal class CategoryAlreadyScoredException(CategoryKey key) : GameException($"{key}") { }
+internal class CategoryAlreadyScoredException(CategoryKey key) : GameException($"{key}");

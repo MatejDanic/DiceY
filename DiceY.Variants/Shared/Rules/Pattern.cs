@@ -1,13 +1,14 @@
 ﻿using DiceY.Domain.Entities;
 using DiceY.Domain.Interfaces;
+using System.Collections.Immutable;
 
 namespace DiceY.Variants.Shared.Rules;
 
 public sealed class Pattern : IScoringRule
 {
-    private readonly IReadOnlyDictionary<ISet<int>, int> _patterns;
+    private readonly IReadOnlyDictionary<IReadOnlySet<int>, int> _patterns;
 
-    public Pattern(IReadOnlyDictionary<ISet<int>, int> patterns)
+    public Pattern(IReadOnlyDictionary<IReadOnlySet<int>, int> patterns)
     {
         ArgumentException.ThrowIfNullOrEmpty(nameof(patterns));
         _patterns = patterns;

@@ -25,4 +25,13 @@
     <Using Include="Xunit" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Balut\" />
+    <Folder Include="Crab\" />
+    <Folder Include="Generala\" />
+    <Folder Include="Kniffel\" />
+    <Folder Include="Yahtzee\" />
+    <Folder Include="Yamb\" />
+  </ItemGroup>
+
 </Project>

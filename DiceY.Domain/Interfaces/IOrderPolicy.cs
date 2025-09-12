@@ -7,5 +7,3 @@ public interface IOrderPolicy
 {
     bool CanFill(IReadOnlyList<Category> categories, CategoryKey categoryKey);
 }
-
-

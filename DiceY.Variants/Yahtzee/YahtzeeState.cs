@@ -7,26 +7,18 @@ namespace DiceY.Variants.Yahtzee;
 public sealed record YahtzeeState : IGameState
 {
     public int RollCount { get; init; }
-
     public IReadOnlyList<Die> Dice => _dice;
     public IReadOnlyList<Column> Columns => _columns;
 
-    private readonly ImmutableArray<Die> _dice;
-    private readonly ImmutableArray<Column> _columns;
+    private readonly IReadOnlyList<Die> _dice;
+    private readonly IReadOnlyList<Column> _columns;
 
-    public YahtzeeState(ImmutableArray<Die> dice, ImmutableArray<Column> columns, int rollCount = 0)
+    public YahtzeeState(IReadOnlyList<Die> dice, IReadOnlyList<Column> columns, int rollCount = 0)
     {
-        if (dice.IsDefault) throw new ArgumentException(nameof(dice));
-        if (columns.IsDefault) throw new ArgumentException(nameof(columns));
+        ArgumentNullException.ThrowIfNull(dice, nameof(dice));
+        ArgumentNullException.ThrowIfNull(columns, nameof(columns));
         _dice = dice;
         _columns = columns;
         RollCount = rollCount;
     }
-
-    public YahtzeeState WithDice(ImmutableArray<Die> dice) =>
-        new(dice, _columns, RollCount);
-
-    public YahtzeeState WithColumns(ImmutableArray<Column> columns) =>
-        new(_dice, columns, RollCount);
-
 }

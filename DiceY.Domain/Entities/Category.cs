@@ -1,19 +1,26 @@
 ﻿using DiceY.Domain.Exceptions;
 using DiceY.Domain.Interfaces;
 using DiceY.Domain.Primitives;
+using DiceY.Domain.ValueObjects;
 
 namespace DiceY.Domain.Entities;
 
 public sealed class Category
 {
-    public CategoryKey Key { get; }
     private readonly IScoringRule _rule;
+    public CategoryKey Key { get; }
     public int? Score { get; }
 
-    public Category(CategoryKey key, IScoringRule rule, int? score = null)
+    public Category(CategoryDefinition def, int? score = null)
     {
-        ArgumentNullException.ThrowIfNull(key, nameof(key));
-        ArgumentNullException.ThrowIfNull(rule, nameof(rule));
+        ArgumentNullException.ThrowIfNull(def);
+        Key = def.Key;
+        _rule = def.Rule;
+        Score = score;
+    }
+
+    private Category(CategoryKey key, IScoringRule rule, int? score)
+    {
         Key = key;
         _rule = rule;
         Score = score;
@@ -21,10 +28,12 @@ public sealed class Category
 
     public Category Fill(IReadOnlyList<Die> dice)
     {
-        if (Score.HasValue)
-            throw new CategoryAlreadyScoredException(Key);
-
-        var newScore = _rule.GetScore(dice);
-        return new Category(Key, _rule, newScore);
+        ArgumentNullException.ThrowIfNull(dice);
+        if (Score.HasValue) throw new CategoryAlreadyScoredException(Key);
+        return new Category(
+            key: Key,
+            rule: _rule,
+            score: _rule.GetScore(dice)
+        );
     }
 }

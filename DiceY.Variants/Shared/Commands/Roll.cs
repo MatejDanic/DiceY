@@ -2,5 +2,5 @@
 
 namespace DiceY.Variants.Shared.Commands;
 
-public sealed record Roll(int Mask) : IGameCommand<IGameState>;
+public sealed record Roll(int Mask = 0) : IGameCommand<IGameState>;
 

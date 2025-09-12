@@ -1,7 +1,7 @@
-﻿using Yamb.Domain.Rules;
-using Yamb.TestUtil;
+﻿using DiceY.Variants.Shared.Rules;
+using DiceY.TestUtil;
 
-namespace Yamb.Domain.UnitTests.Rules;
+namespace DiceY.Variants.Tests.Shared.Rules;
 
 public sealed class SumTests
 {
@@ -13,8 +13,7 @@ public sealed class SumTests
     public void ComputesTotal_D6(int[] values, int expected)
     {
         var rule = new Sum();
-        var ok = rule.TryScore(DiceFactory.D6(values), out var score);
-        Assert.True(ok);
+        var score = rule.GetScore(DiceFactory.D6(values));
         Assert.Equal(expected, score);
     }
 
@@ -22,26 +21,22 @@ public sealed class SumTests
     public void WorksWithDifferentSides()
     {
         var rule = new Sum();
-        var ok = rule.TryScore(DiceFactory.D(8, 7, 7, 1, 8), out var score);
-        Assert.True(ok);
+        var score = rule.GetScore(DiceFactory.D(8, 7, 7, 1, 8));
         Assert.Equal(23, score);
     }
 
     [Fact]
-    public void ReturnsFalseWithEmptyDice()
+    public void ReturnsZeroWithEmptyDice()
     {
         var rule = new Sum();
-        var ok = rule.TryScore(DiceFactory.D6(), out var score);
-        Assert.False(ok);
+        var score = rule.GetScore(DiceFactory.D6());
         Assert.Equal(0, score);
     }
 
     [Fact]
-    public void ReturnsFalseWhenDiceIsNull()
+    public void GetScore_WhenDiceIsNull_Throws()
     {
         var rule = new Sum();
-        var ok = rule.TryScore(null, out var score);
-        Assert.False(ok);
-        Assert.Equal(0, score);
+        Assert.Throws<ArgumentNullException>(() => rule.GetScore(null!));
     }
 }

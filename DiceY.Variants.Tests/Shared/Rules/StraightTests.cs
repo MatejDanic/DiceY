@@ -1,7 +1,7 @@
-﻿using Yamb.Domain.Rules;
-using Yamb.TestUtil;
+﻿using DiceY.Variants.Shared.Rules;
+using DiceY.TestUtil;
 
-namespace Yamb.Domain.UnitTests.Rules;
+namespace DiceY.Variants.Tests.Shared.Rules;
 
 public sealed class StraightTests
 {
@@ -9,8 +9,7 @@ public sealed class StraightTests
     public void FixedScore_SucceedsOnRun()
     {
         var rule = new Straight(n: 4, fixedScore: 30);
-        var ok = rule.TryScore(DiceFactory.D6(1, 2, 3, 4, 6), out var score);
-        Assert.True(ok);
+        var score = rule.GetScore(DiceFactory.D6(1, 2, 3, 4, 6));
         Assert.Equal(30, score);
     }
 
@@ -18,8 +17,7 @@ public sealed class StraightTests
     public void FixedScore_IgnoresDuplicates()
     {
         var rule = new Straight(n: 5, fixedScore: 40);
-        var ok = rule.TryScore(DiceFactory.D6(1, 1, 2, 3, 4, 5), out var score);
-        Assert.True(ok);
+        var score = rule.GetScore(DiceFactory.D6(1, 1, 2, 3, 4, 5));
         Assert.Equal(40, score);
     }
 
@@ -27,8 +25,7 @@ public sealed class StraightTests
     public void FixedScore_FailsWithoutRun()
     {
         var rule = new Straight(n: 5, fixedScore: 40);
-        var ok = rule.TryScore(DiceFactory.D6(1, 2, 2, 4, 6), out var score);
-        Assert.False(ok);
+        var score = rule.GetScore(DiceFactory.D6(1, 2, 2, 4, 6));
         Assert.Equal(0, score);
     }
 
@@ -36,53 +33,46 @@ public sealed class StraightTests
     public void Bonus_Applied_WhenNoFixedScore()
     {
         var rule = new Straight(n: 5, bonus: 7, fixedScore: 0);
-        var ok = rule.TryScore(DiceFactory.D6(1, 2, 3, 4, 5), out var score);
-        Assert.True(ok);
-        Assert.Equal(15 + 7, score);
+        var score = rule.GetScore(DiceFactory.D6(1, 2, 3, 4, 5));
+        Assert.Equal(22, score);
     }
 
     [Fact]
     public void UsesSumOfAllDice_WhenNoFixedScore_EvenWithDuplicates()
     {
         var rule = new Straight(n: 5, bonus: 0, fixedScore: 0);
-        var ok = rule.TryScore(DiceFactory.D6(1, 1, 2, 3, 4, 5), out var score);
-        Assert.True(ok);
-        Assert.Equal(1 + 1 + 2 + 3 + 4 + 5, score);
+        var score = rule.GetScore(DiceFactory.D6(1, 1, 2, 3, 4, 5));
+        Assert.Equal(16, score);
     }
 
     [Fact]
     public void WorksWithDifferentSides()
     {
         var rule = new Straight(n: 5, fixedScore: 45);
-        var ok = rule.TryScore(DiceFactory.D(8, 2, 3, 4, 5, 6, 8), out var score);
-        Assert.True(ok);
+        var score = rule.GetScore(DiceFactory.D(8, 2, 3, 4, 5, 6, 8));
         Assert.Equal(45, score);
     }
 
     [Fact]
-    public void ReturnsFalse_WhenDiceIsNull()
+    public void GetScore_WhenDiceIsNull_Throws()
     {
         var rule = new Straight(n: 5, fixedScore: 40);
-        var ok = rule.TryScore(null, out var score);
-        Assert.False(ok);
+        Assert.Throws<ArgumentNullException>(() => rule.GetScore(null!));
+    }
+
+    [Fact]
+    public void ReturnsZero_WhenDiceIsEmpty()
+    {
+        var rule = new Straight(n: 5, fixedScore: 40);
+        var score = rule.GetScore(DiceFactory.D6());
         Assert.Equal(0, score);
     }
 
     [Fact]
-    public void ReturnsFalse_WhenDiceIsEmpty()
+    public void ReturnsZero_WhenDiceCountLessThanN()
     {
         var rule = new Straight(n: 5, fixedScore: 40);
-        var ok = rule.TryScore(DiceFactory.D6(), out var score);
-        Assert.False(ok);
-        Assert.Equal(0, score);
-    }
-
-    [Fact]
-    public void ReturnsFalse_WhenDiceCountLessThanN()
-    {
-        var rule = new Straight(n: 5, fixedScore: 40);
-        var ok = rule.TryScore(DiceFactory.D6(1, 2, 3, 4), out var score);
-        Assert.False(ok);
+        var score = rule.GetScore(DiceFactory.D6(1, 2, 3, 4));
         Assert.Equal(0, score);
     }
 }

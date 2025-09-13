@@ -11,7 +11,7 @@ public sealed class CategoryTests
     {
         private readonly bool _result = result;
         private readonly int _scored = scored;
-        public bool TryScore(IReadOnlyList<Die> dice, out int score) { score = _scored; return _result; }
+        public int GetScore(IReadOnlyList<Die> dice, out int score) { return _result; }
     }
 
     [Fact]

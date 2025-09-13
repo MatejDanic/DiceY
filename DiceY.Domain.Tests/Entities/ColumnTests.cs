@@ -1,10 +1,10 @@
 ﻿
-using Yamb.Domain.Entities;
-using Yamb.Domain.Interfaces;
-using Yamb.Domain.Primitives;
-using Yamb.TestUtil;
+using DiceY.Domain.Entities;
+using DiceY.Domain.Interfaces;
+using DiceY.Domain.Primitives;
+using DiceY.TestUtil;
 
-namespace Yamb.Domain.UnitTests.Entities;
+namespace DiceY.Domain.Tests.Entities;
 
 public sealed class ColumnTests
 {

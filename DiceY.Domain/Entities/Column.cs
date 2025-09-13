@@ -21,11 +21,9 @@ public sealed class Column
     {
         ArgumentNullException.ThrowIfNull(def);
         ArgumentNullException.ThrowIfNull(categories);
-
         Key = def.Key;
         _policy = def.Policy;
         _calculateScore = def.CalculateScore;
-
         Categories = [.. categories.DistinctBy(c => c.Key)];
     }
 

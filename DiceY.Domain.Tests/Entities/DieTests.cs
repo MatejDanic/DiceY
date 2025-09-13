@@ -1,7 +1,7 @@
-using Yamb.Domain.Entities;
-using Yamb.TestUtil;
+using DiceY.Domain.Entities;
+using DiceY.TestUtil;
 
-namespace Yamb.Domain.UnitTests.Entities;
+namespace DiceY.Domain.Tests.Entities;
 
 public sealed class DieTests
 {

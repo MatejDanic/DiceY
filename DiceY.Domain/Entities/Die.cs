@@ -11,13 +11,15 @@ public sealed class Die
     {
         ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(sides, 1, nameof(sides));
         ArgumentOutOfRangeException.ThrowIfGreaterThanOrEqual(sides, 10, nameof(sides));
-        ArgumentOutOfRangeException.ThrowIfGreaterThan(value, sides);
+        ArgumentOutOfRangeException.ThrowIfLessThan(value, 1, nameof(sides));
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(value, sides, nameof(value));
         _sides = sides;
         Value = value;
     }
 
     public Die Roll(IRollService rng)
     {
+        ArgumentNullException.ThrowIfNull(rng);
         var newValue = rng.NextRoll(_sides);
         return new Die(_sides, newValue);
     }

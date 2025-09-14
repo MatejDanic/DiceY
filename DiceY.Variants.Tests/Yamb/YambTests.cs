@@ -15,7 +15,7 @@ public sealed class YambTests
         => new(rng ?? new FixedRollService([]), def);
 
     private static YambState WithDice(YambState s, params int[] values)
-        => new([.. DiceFactory.D6(values)], [.. s.Columns], s.RollCount, s.Announcement);
+        => new(DiceFactory.D6(values), [.. s.Columns], s.RollCount, s.Announcement);
 
     private static Column Col(YambState s, string keyValue) =>
         s.Columns.First(c => c.Key.Value == keyValue);

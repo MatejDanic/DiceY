@@ -54,10 +54,11 @@ public sealed class StraightTests
     }
 
     [Fact]
-    public void GetScore_WhenDiceIsNull_Throws()
+    public void GetScore_WhenDiceIsNull_ReturnsZero()
     {
         var rule = new Straight(n: 5, fixedScore: 40);
-        Assert.Throws<ArgumentNullException>(() => rule.GetScore(null!));
+        var score = rule.GetScore(null!);
+        Assert.Equal(0, score);
     }
 
     [Fact]

@@ -10,7 +10,7 @@ public sealed class Die
     public Die(int sides = 6, int value = 6)
     {
         ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(sides, 1, nameof(sides));
-        ArgumentOutOfRangeException.ThrowIfGreaterThanOrEqual(sides, 10, nameof(sides));
+        ArgumentOutOfRangeException.ThrowIfGreaterThanOrEqual(sides, 11, nameof(sides));
         ArgumentOutOfRangeException.ThrowIfLessThan(value, 1, nameof(sides));
         ArgumentOutOfRangeException.ThrowIfGreaterThan(value, sides, nameof(value));
         _sides = sides;

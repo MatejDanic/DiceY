@@ -1,5 +1,6 @@
-﻿using DiceY.Variants.Shared.Rules;
-using DiceY.TestUtil;
+﻿using DiceY.TestUtil;
+using DiceY.Variants.Shared.Rules;
+using static System.Formats.Asn1.AsnWriter;
 
 namespace DiceY.Variants.Tests.Shared.Rules;
 
@@ -41,10 +42,11 @@ public sealed class FaceSumTests
     }
 
     [Fact]
-    public void GetScore_WhenDiceIsNull_Throws()
+    public void GetScore_WhenDiceIsNull_ReturnsZero()
     {
         var rule = new FaceSum(2);
-        Assert.Throws<ArgumentNullException>(() => rule.GetScore(null!));
+        var score = rule.GetScore(null!);
+        Assert.Equal(0, score);
     }
 
     [Fact]

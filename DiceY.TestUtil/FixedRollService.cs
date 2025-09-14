@@ -2,9 +2,9 @@
 
 namespace DiceY.TestUtil;
 
-public sealed class FixedRollService(IEnumerable<int> values) : IRollService
+public sealed class FixedRollService(IEnumerable<int>? values = null) : IRollService
 {
-    private readonly Queue<int> _values = new(values);
+    private readonly Queue<int> _values = new(values ?? []);
 
     public int NextRoll(int sides)
     {

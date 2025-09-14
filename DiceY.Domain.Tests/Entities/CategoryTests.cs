@@ -1,75 +1,64 @@
 ﻿using DiceY.Domain.Entities;
+using DiceY.Domain.Exceptions;
 using DiceY.Domain.Interfaces;
 using DiceY.Domain.Primitives;
+using DiceY.Domain.ValueObjects;
 using DiceY.TestUtil;
 
-namespace DiceY.Domain.UnitTests.Entities;
+namespace DiceY.Domain.Tests.Entities;
 
 public sealed class CategoryTests
 {
-    private sealed class StubRule(bool result, int scored) : IScoringRule
+    private sealed class StubRule(int score) : IScoringRule
     {
-        private readonly bool _result = result;
-        private readonly int _scored = scored;
-        public int GetScore(IReadOnlyList<Die> dice, out int score) { return _result; }
+        private readonly int _score = score;
+        public int GetScore(IReadOnlyList<Die> dice) => _score;
     }
 
     [Fact]
-    public void Ctor_AssignsKey()
+    public void Ctor_AssignsKey_AndScoreIsNull()
     {
         var key = new CategoryKey("ones");
-        var cat = new Category(key, new StubRule(true, 3));
-        Assert.Equal(key, cat.CategoryKey);
+        var cat = new Category(new CategoryDefinition(key, new StubRule(3)));
+        Assert.Equal(key, cat.Key);
         Assert.Null(cat.Score);
     }
 
     [Fact]
-    public void Ctor_NullRule_Throws()
+    public void Ctor_NullDefinition_Throws()
     {
-        var key = new CategoryKey("any");
-        Assert.Throws<ArgumentNullException>(() => new Category(key, null));
+        Assert.Throws<ArgumentNullException>(() => new Category(def: null!));
     }
 
     [Fact]
-    public void TryScore_NullDice_ReturnsFalse_AndDoesNotSetScore()
+    public void Fill_NullDice_Throws()
     {
-        var cat = new Category(new CategoryKey("x"), new StubRule(true, 10));
-        var ok = cat.TryScore(null, out var applied);
-        Assert.False(ok);
-        Assert.Equal(0, applied);
+        var cat = new Category(new CategoryDefinition(new CategoryKey("x"), new StubRule(10)));
+        Assert.Throws<ArgumentNullException>(() => cat.Fill(null!));
+    }
+
+    [Fact]
+    public void Fill_WhenUnscored_ComputesScore_AndReturnsNewInstance()
+    {
+        var cat = new Category(new CategoryDefinition(new CategoryKey("x"), new StubRule(12)));
+        var filled = cat.Fill(DiceFactory.D6(1, 2, 3));
         Assert.Null(cat.Score);
+        Assert.Equal(12, filled.Score);
+        Assert.Equal(cat.Key, filled.Key);
     }
 
     [Fact]
-    public void TryScore_WhenRuleSucceeds_SetsScore_AndReturnsTrue()
+    public void Fill_WhenRuleReturnsZero_SetsZero()
     {
-        var cat = new Category(new CategoryKey("x"), new StubRule(true, 12));
-        var ok = cat.TryScore(DiceFactory.D6(1, 2, 3), out var applied);
-        Assert.True(ok);
-        Assert.Equal(12, applied);
-        Assert.Equal(12, cat.Score);
+        var cat = new Category(new CategoryDefinition(new CategoryKey("x"), new StubRule(0)));
+        var filled = cat.Fill(DiceFactory.D6(1, 2, 3));
+        Assert.Equal(0, filled.Score);
     }
 
     [Fact]
-    public void TryScore_WhenRuleFails_CrossesOutWithZero_AndReturnsTrue()
+    public void Fill_WhenAlreadyScored_Throws()
     {
-        var cat = new Category(new CategoryKey("x"), new StubRule(false, 99));
-        var ok = cat.TryScore(DiceFactory.D6(1, 2, 3), out var applied);
-        Assert.True(ok);
-        Assert.Equal(0, applied);
-        Assert.Equal(0, cat.Score);
-    }
-
-    [Fact]
-    public void TryScore_SecondTime_ReturnsFalse_AndDoesNotChangeScore()
-    {
-        var cat = new Category(new CategoryKey("x"), new StubRule(true, 7));
-        var ok1 = cat.TryScore(DiceFactory.D6(1, 2, 3), out var applied1);
-        var ok2 = cat.TryScore(DiceFactory.D6(4, 5, 6), out var applied2);
-        Assert.True(ok1);
-        Assert.Equal(7, applied1);
-        Assert.False(ok2);
-        Assert.Equal(0, applied2);
-        Assert.Equal(7, cat.Score);
+        var cat = new Category(new CategoryDefinition(new CategoryKey("x"), new StubRule(7)), score: 7);
+        Assert.Throws<CategoryAlreadyScoredException>(() => cat.Fill(DiceFactory.D6(4, 5, 6)));
     }
 }

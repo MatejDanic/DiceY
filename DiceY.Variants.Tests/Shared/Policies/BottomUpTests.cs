@@ -52,6 +52,6 @@ public sealed class BottomUpTests
     public void Denies_When_List_Empty()
     {
         var policy = new BottomUp();
-        Assert.False(policy.CanFill(Array.Empty<Category>(), new CategoryKey("a")));
+        Assert.False(policy.CanFill([], new CategoryKey("a")));
     }
 }

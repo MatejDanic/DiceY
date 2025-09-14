@@ -1,5 +1,6 @@
 ﻿using DiceY.Domain.Entities;
 using DiceY.Domain.Interfaces;
+using DiceY.Domain.Primitives;
 using DiceY.Domain.ValueObjects;
 using DiceY.Variants.Shared.Commands;
 using System.Collections.Immutable;
@@ -31,41 +32,34 @@ public sealed class YahtzeeEngine(IRollService rng, GameDefinition? definition =
     {
         ArgumentNullException.ThrowIfNull(state);
         ArgumentNullException.ThrowIfNull(action);
-
-        switch (action)
+        return action switch
         {
-            case Roll roll:
-                {
-                    if (state.RollCount >= Definition.MaxRollsPerTurn)
-                        throw new InvalidOperationException("Max rolls per turn reached.");
+            Roll roll => ReduceRoll(state, roll.Mask),
+            Fill fill => ReduceFill(state, fill.CategoryKey),
+            _ => throw new NotSupportedException(action.GetType().Name)
+        };
+    }
 
-                    var mask = roll.Mask;
-                    var dice = state.Dice
-                        .Select((d, i) => ((mask >> i) & 1) == 1 ? d : d.Roll(rng))
-                        .ToImmutableArray();
+    private YahtzeeState ReduceRoll(YahtzeeState state, int mask)
+    {
+        if ((mask >> Definition.DiceCount) != 0)
+            throw new ArgumentOutOfRangeException(nameof(mask));
+        if (state.RollCount >= Definition.MaxRollsPerTurn)
+            throw new InvalidOperationException("Max rolls per turn reached.");
+        var dice = state.Dice
+            .Select((d, i) => ((mask >> i) & 1) == 1 ? d : d.Roll(rng))
+            .ToImmutableArray();
+        return new YahtzeeState(dice, [.. state.Columns], state.RollCount + 1);
+    }
 
-                    return new YahtzeeState(dice, state.Columns.ToImmutableArray(), state.RollCount + 1);
-                }
-            case Fill fill:
-                {
-                    var cols = state.Columns.ToImmutableArray();
-                    var index = state.Columns
-                        .Select((c, i) => (c, i))
-                        .FirstOrDefault(x => x.c.Key.Equals(fill.ColumnKey)).i;
-                    if (index == default && !state.Columns[0].Key.Equals(fill.ColumnKey))
-                        throw new KeyNotFoundException($"{fill.ColumnKey}");
-
-                    var updated = cols[index].Fill(state.Dice, fill.CategoryKey);
-                    cols = cols.SetItem(index, updated);
-
-                    var resetDice = Enumerable.Range(0, Definition.DiceCount)
-                        .Select(_ => new Die(Definition.DiceSides))
-                        .ToImmutableArray();
-
-                    return new YahtzeeState(resetDice, cols, 0);
-                }
-            default:
-                throw new NotSupportedException(action.GetType().Name);
-        }
+    private YahtzeeState ReduceFill(YahtzeeState state, CategoryKey categoryKey)
+    {
+        var cols = state.Columns.ToImmutableArray();
+        var updated = state.Columns[0].Fill(state.Dice, categoryKey);
+        cols = cols.SetItem(0, updated);
+        var resetDice = Enumerable.Range(0, Definition.DiceCount)
+            .Select(_ => new Die(Definition.DiceSides))
+            .ToImmutableArray();
+        return new YahtzeeState(resetDice, cols, 0);
     }
 }

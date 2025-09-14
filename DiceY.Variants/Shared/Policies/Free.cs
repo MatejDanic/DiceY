@@ -8,6 +8,10 @@ public sealed class Free : IOrderPolicy
 {
     public bool CanFill(IReadOnlyList<Category> categories, CategoryKey categoryKey)
     {
-        throw new NotImplementedException();
+        if (categories is null || categories.Count == 0) return false;
+        for (int i = 0; i < categories.Count; i++)
+            if (categories[i].Key.Equals(categoryKey))
+                return !categories[i].Score.HasValue;
+        return false;
     }
 }

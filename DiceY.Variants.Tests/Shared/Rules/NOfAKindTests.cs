@@ -54,10 +54,11 @@ public sealed class NOfAKindTests
     }
 
     [Fact]
-    public void GetScore_WhenDiceIsNull_Throws()
+    public void GetScore_WhenDiceIsNull_ReturnsZero()
     {
         var rule = new NOfAKind(3);
-        Assert.Throws<ArgumentNullException>(() => rule.GetScore(null!));
+        var score = rule.GetScore(null!);
+        Assert.Equal(0, score);
     }
 
     [Fact]

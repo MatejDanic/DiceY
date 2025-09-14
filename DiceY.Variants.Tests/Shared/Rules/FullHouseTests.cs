@@ -62,9 +62,10 @@ public sealed class FullHouseTests
     }
 
     [Fact]
-    public void GetScore_WhenDiceIsNull_Throws()
+    public void GetScore_WhenDiceIsNull_ReturnsZero()
     {
         var rule = new FullHouse(bonus: 0, fixedScore: 0);
-        Assert.Throws<ArgumentNullException>(() => rule.GetScore(null!));
+        var score = rule.GetScore(null!);
+        Assert.Equal(0, score);
     }
 }

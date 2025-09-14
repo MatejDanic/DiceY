@@ -97,7 +97,7 @@ public sealed class YambTests
         var scored = rs.Reduce(s2, new Fill(ColKey(rs, "announcement"), trips));
         var cat = Col(scored, "announcement").Categories.First(c => c.Key.Value == "trips");
         Assert.True(cat.Score.HasValue);
-        Assert.Equal(3 * 2, cat.Score);
+        Assert.Equal(3 * 2 + 10, cat.Score);
         Assert.Equal(0, scored.RollCount);
     }
 

@@ -87,15 +87,10 @@ public sealed class YambEngine(IRollService rng, GameDefinition? definition = nu
             throw new InvalidOperationException("Must score in announcement column.");
         if (currentAnnouncement.HasValue && !categoryKey.Equals(currentAnnouncement.Value))
             throw new InvalidOperationException("Must score announced category.");
-        var cols = state.Columns.ToImmutableArray();
-        var idx = cols.Select((c, i) => (c, i)).FirstOrDefault(x => x.c.Key.Equals(columnKey)).i;
-        if (idx == default && !cols[0].Key.Equals(columnKey))
-            throw new KeyNotFoundException($"{columnKey}");
-        var updated = cols[idx].Fill(state.Dice, categoryKey);
-        cols = cols.SetItem(idx, updated);
-        var resetDice = Enumerable.Range(0, Definition.DiceCount)
-            .Select(_ => new Die(Definition.DiceSides))
-            .ToImmutableArray();
-        return new YambState(resetDice, cols, 0, null);
+
+        var column = state.Columns.Where(c => c.Key == columnKey).First();
+        var updated = column.Fill(state.Dice, categoryKey);
+        var newColumns = state.Columns.SetItem(state.Columns.IndexOf(column), updated);
+        return state with { Columns = newColumns };
     }
 }

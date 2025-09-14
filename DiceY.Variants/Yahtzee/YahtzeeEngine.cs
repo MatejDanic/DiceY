@@ -54,12 +54,11 @@ public sealed class YahtzeeEngine(IRollService rng, GameDefinition? definition =
 
     private YahtzeeState ReduceFill(YahtzeeState state, CategoryKey categoryKey)
     {
-        var cols = state.Columns.ToImmutableArray();
         var updated = state.Columns[0].Fill(state.Dice, categoryKey);
-        cols = cols.SetItem(0, updated);
+        var newColumns = state.Columns.SetItem(0, updated);
         var resetDice = Enumerable.Range(0, Definition.DiceCount)
             .Select(_ => new Die(Definition.DiceSides))
             .ToImmutableArray();
-        return new YahtzeeState(resetDice, cols, 0);
+        return new YahtzeeState(resetDice, newColumns);
     }
 }

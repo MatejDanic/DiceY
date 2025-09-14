@@ -40,28 +40,6 @@ public sealed record YambConfig
         Trips, Straight, FullHouse, Poker, Yamb
     ];
 
-    private static readonly ImmutableDictionary<CategoryKey, IScoringRule> Rules =
-        new Dictionary<CategoryKey, IScoringRule>
-        {
-            [Ones] = new FaceSum(1),
-            [Twos] = new FaceSum(2),
-            [Threes] = new FaceSum(3),
-            [Fours] = new FaceSum(4),
-            [Fives] = new FaceSum(5),
-            [Sixes] = new FaceSum(6),
-            [Max] = new Sum(),
-            [Min] = new Sum(),
-            [Trips] = new NOfAKind(3),
-            [Straight] = new Pattern(new Dictionary<IReadOnlySet<int>, int>
-            {
-                [new HashSet<int> { 1, 2, 3, 4, 5 }] = 35,
-                [new HashSet<int> { 2, 3, 4, 5, 6 }] = 45
-            }),
-            [FullHouse] = new FullHouse(0, 30),
-            [Poker] = new NOfAKind(4),
-            [Yamb] = new NOfAKind(5, 0, 50)
-        }.ToImmutableDictionary();
-
     private static readonly ImmutableArray<ColumnKey> ColumnOrder = [Down, Up, Free, Announcement];
 
     private static readonly ImmutableDictionary<ColumnKey, IOrderPolicy> Policies =
@@ -73,12 +51,44 @@ public sealed record YambConfig
             [Announcement] = new Free()
         }.ToImmutableDictionary();
 
+    private const int TripsBonus = 10;
+    private const int SmallStraightScore = 35;
+    private const int LargeStraightScore = 45;
+    private const int FullHouseBonus = 30;
+    private const int PokerBonus = 40;
+    private const int YambBonus = 50;
+
+    private static readonly ImmutableDictionary<CategoryKey, IScoringRule> Rules =
+        new Dictionary<CategoryKey, IScoringRule>
+        {
+            [Ones] = new FaceSum(1),
+            [Twos] = new FaceSum(2),
+            [Threes] = new FaceSum(3),
+            [Fours] = new FaceSum(4),
+            [Fives] = new FaceSum(5),
+            [Sixes] = new FaceSum(6),
+            [Max] = new Sum(),
+            [Min] = new Sum(),
+            [Trips] = new NOfAKind(3, bonus: TripsBonus),
+            [Straight] = new Pattern(new Dictionary<IReadOnlySet<int>, int>
+            {
+                [new HashSet<int> { 1, 2, 3, 4, 5 }] = SmallStraightScore,
+                [new HashSet<int> { 2, 3, 4, 5, 6 }] = LargeStraightScore
+            }),
+            [FullHouse] = new FullHouse(FullHouseBonus),
+            [Poker] = new NOfAKind(4, bonus: PokerBonus),
+            [Yamb] = new NOfAKind(5, bonus: YambBonus)
+        }.ToImmutableDictionary();
+
+    private const int TopSectionBonus = 35;
+    private const int TopSectionBonusThreshold = 63;
+
     private static readonly CalculateScore _calculateScore = categories =>
     {
         var map = categories.ToDictionary(c => c.Key, c => c);
         var topSectionSum = TopSection.Where(k => map.TryGetValue(k, out var c) && c.Score.HasValue).Sum(k => map[k].Score ?? 0);
         var bottomSectionSum = BottomSection.Where(k => map.TryGetValue(k, out var c) && c.Score.HasValue).Sum(k => map[k].Score ?? 0);
-        var baseSum = topSectionSum + bottomSectionSum;
+        var baseSum = topSectionSum + (topSectionSum > TopSectionBonusThreshold ? TopSectionBonus : 0) + bottomSectionSum;
         if (!map.TryGetValue(Max, out var maxC) || !map.TryGetValue(Min, out var minC) || !map.TryGetValue(Ones, out var onesC))
             return baseSum;
         if (!maxC.Score.HasValue || !minC.Score.HasValue || !onesC.Score.HasValue)

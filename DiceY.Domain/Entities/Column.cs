@@ -10,12 +10,13 @@ namespace DiceY.Domain.Entities;
 public sealed class Column
 {
     public ColumnKey Key { get; }
+    public IReadOnlyList<Category> Categories => _categories;
+    public bool IsCompleted => _categories.All(c => c.Score.HasValue);
+    public int Score => _calculateScore(_categories);
+
     private readonly IOrderPolicy _policy;
     private readonly CalculateScore _calculateScore;
-
-    public ImmutableArray<Category> Categories { get; }
-    public bool IsCompleted => Categories.All(c => c.Score.HasValue);
-    public int Score => _calculateScore(Categories);
+    private readonly ImmutableArray<Category> _categories;
 
     public Column(ColumnDefinition def, IEnumerable<Category> categories)
     {
@@ -24,7 +25,8 @@ public sealed class Column
         Key = def.Key;
         _policy = def.Policy;
         _calculateScore = def.CalculateScore;
-        Categories = [.. categories.DistinctBy(c => c.Key)];
+        _categories = [.. categories.DistinctBy(c => c.Key)];
+        if (_categories.IsDefault) throw new ArgumentException(nameof(categories));
     }
 
     private Column(ColumnKey key, IOrderPolicy policy, CalculateScore calc, ImmutableArray<Category> categories)
@@ -32,24 +34,18 @@ public sealed class Column
         Key = key;
         _policy = policy;
         _calculateScore = calc;
-        Categories = categories;
+        _categories = categories;
     }
 
     public Column Fill(IReadOnlyList<Die> dice, CategoryKey categoryKey)
     {
         ArgumentNullException.ThrowIfNull(dice);
-        if (!_policy.CanFill(Categories, categoryKey))
+        if (!_policy.CanFill(_categories, categoryKey))
             throw new ColumnFillPolicyException(Key, categoryKey);
 
-        var index = Categories
-            .Select((c, i) => new { c, i })
-            .FirstOrDefault(x => x.c.Key.Equals(categoryKey))?.i ?? -1;
-        if (index < 0)
-            throw new ArgumentException($"Category {categoryKey} not found in column {Key}", nameof(categoryKey));
-
-        var updated = Categories[index].Fill(dice);
-        var newCategories = Categories.SetItem(index, updated);
-
+        var category = _categories.Where(c => c.Key == categoryKey).First();
+        var updated = category.Fill(dice);
+        var newCategories = _categories.SetItem(_categories.IndexOf(category), updated);
         return new Column(Key, _policy, _calculateScore, newCategories);
     }
 }

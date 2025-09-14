@@ -28,16 +28,6 @@ public sealed record YahtzeeConfig
     private static readonly ImmutableHashSet<CategoryKey> TopSection = [Ones, Twos, Threes, Fours, Fives, Sixes];
     private static readonly ImmutableHashSet<CategoryKey> BottomSection = [ThreeOfAKind, FourOfAKind, FullHouse, SmallStraight, LargeStraight, Yahtzee, Chance];
 
-    private const int TopSectionBonus = 35;
-    private const int TopSectionBonusThreshold = 63;
-
-    private static readonly CalculateScore CalculateScore = categories =>
-    {
-        var topSectionSum = categories.Where(c => c.Score.HasValue && TopSection.Contains(c.Key)).Sum(c => c.Score ?? 0);
-        var bottomSectionSum = categories.Where(c => c.Score.HasValue && BottomSection.Contains(c.Key)).Sum(c => c.Score ?? 0);
-        return topSectionSum + (topSectionSum >= TopSectionBonusThreshold ? TopSectionBonus : 0) + bottomSectionSum;
-    };
-
     private const int FullHouseScore = 25;
     private const int SmallStraightScore = 30;
     private const int LargeStraightScore = 40;
@@ -53,12 +43,22 @@ public sealed record YahtzeeConfig
         [Sixes] = new FaceSum(6),
         [ThreeOfAKind] = new NOfAKind(3),
         [FourOfAKind] = new NOfAKind(4),
-        [FullHouse] = new FullHouse(0, FullHouseScore),
-        [SmallStraight] = new Straight(4, SmallStraightScore),
-        [LargeStraight] = new Straight(5, LargeStraightScore),
-        [Yahtzee] = new NOfAKind(5, 0, YahtzeeScore),
+        [FullHouse] = new FullHouse(fixedScore: FullHouseScore),
+        [SmallStraight] = new Straight(4, fixedScore: SmallStraightScore),
+        [LargeStraight] = new Straight(5, fixedScore: LargeStraightScore),
+        [Yahtzee] = new NOfAKind(5, fixedScore: YahtzeeScore),
         [Chance] = new Sum()
     }.ToImmutableDictionary();
+
+    private const int TopSectionBonus = 35;
+    private const int TopSectionBonusThreshold = 63;
+
+    private static readonly CalculateScore CalculateScore = categories =>
+    {
+        var topSectionSum = categories.Where(c => c.Score.HasValue && TopSection.Contains(c.Key)).Sum(c => c.Score ?? 0);
+        var bottomSectionSum = categories.Where(c => c.Score.HasValue && BottomSection.Contains(c.Key)).Sum(c => c.Score ?? 0);
+        return topSectionSum + (topSectionSum >= TopSectionBonusThreshold ? TopSectionBonus : 0) + bottomSectionSum;
+    };
 
     public static GameDefinition Build()
     {

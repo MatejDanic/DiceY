@@ -15,7 +15,7 @@ public sealed class YambTests
         => new(rng ?? new FixedRollService([]), def);
 
     private static YambState WithDice(YambState s, params int[] values)
-        => new(DiceFactory.D6(values), [.. s.Columns], s.RollCount, s.Announcement);
+        => new([.. DiceFactory.D6(values)], [.. s.Columns], s.RollCount, s.Announcement);
 
     private static Column Col(YambState s, string keyValue) =>
         s.Columns.First(c => c.Key.Value == keyValue);
@@ -72,7 +72,7 @@ public sealed class YambTests
     {
         var rs = CreateEngine(def: YambConfig.Build());
         var created = rs.Create();
-        var s = new YambState(created.Dice, created.Columns, rollCount: rs.Definition.MaxRollsPerTurn, announcement: null);
+        var s = new YambState(created.DiceArray, created.ColumnsArray, RollCount: rs.Definition.MaxRollsPerTurn, Announcement: null);
         Assert.Throws<InvalidOperationException>(() => rs.Reduce(s, new Roll(0b11111)));
     }
 

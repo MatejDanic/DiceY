@@ -17,15 +17,11 @@ public sealed class YahtzeeEngine(IRollService rng, GameDefinition? definition =
             .Select(_ => new Die(Definition.DiceSides))
             .ToImmutableArray();
 
-        var cols = Definition.ColumnDefinitions
-            .Select(colDef =>
-            {
-                var cats = Definition.CategoryDefinitions.Select(catDef => new Category(catDef));
-                return new Column(colDef, cats);
-            })
-            .ToImmutableArray();
+        var colDef = Definition.ColumnDefinitions.First();
+        var cats = Definition.CategoryDefinitions.Select(catDef => new Category(catDef));
+        var col = new Column(colDef, cats);
 
-        return new YahtzeeState(dice, cols);
+        return new YahtzeeState(dice, col);
     }
 
     public YahtzeeState Reduce(YahtzeeState state, IGameCommand<YahtzeeState> action)
@@ -49,16 +45,15 @@ public sealed class YahtzeeEngine(IRollService rng, GameDefinition? definition =
         var dice = state.Dice
             .Select((d, i) => ((mask >> i) & 1) == 1 ? d : d.Roll(rng))
             .ToImmutableArray();
-        return new YahtzeeState(dice, [.. state.Columns], state.RollCount + 1);
+        return new YahtzeeState(dice, state.Column, state.RollCount + 1);
     }
 
     private YahtzeeState ReduceFill(YahtzeeState state, CategoryKey categoryKey)
     {
-        var updated = state.Columns[0].Fill(state.Dice, categoryKey);
-        var newColumns = state.Columns.SetItem(0, updated);
+        var updated = state.Column.Fill(state.Dice, categoryKey);
         var resetDice = Enumerable.Range(0, Definition.DiceCount)
             .Select(_ => new Die(Definition.DiceSides))
             .ToImmutableArray();
-        return new YahtzeeState(resetDice, newColumns);
+        return new YahtzeeState(resetDice, updated);
     }
 }

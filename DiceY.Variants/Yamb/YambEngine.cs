@@ -76,7 +76,7 @@ public sealed class YambEngine(IRollService rng, GameDefinition? definition = nu
         var alreadyScored = annCol.Categories.Any(c => c.Key.Equals(categoryKey) && c.Score.HasValue);
         if (alreadyScored)
             throw new InvalidOperationException("Category already scored in announcement column.");
-        return new YambState(state.Dice, [.. state.Columns], state.RollCount, categoryKey);
+        return new YambState([.. state.Dice], [.. state.Columns], state.RollCount, categoryKey);
     }
 
     private YambState ReduceFill(YambState state, ColumnKey columnKey, CategoryKey categoryKey)
@@ -90,7 +90,7 @@ public sealed class YambEngine(IRollService rng, GameDefinition? definition = nu
 
         var column = state.Columns.Where(c => c.Key == columnKey).First();
         var updated = column.Fill(state.Dice, categoryKey);
-        var newColumns = state.Columns.SetItem(state.Columns.IndexOf(column), updated);
-        return state with { Columns = newColumns };
+        var newColumns = state.ColumnsArray.SetItem(state.ColumnsArray.IndexOf(column), updated);
+        return state with { ColumnsArray = newColumns };
     }
 }

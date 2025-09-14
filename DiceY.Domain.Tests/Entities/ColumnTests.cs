@@ -36,7 +36,7 @@ public sealed class ColumnTests
         var b = new Category(new CategoryDefinition(new CategoryKey("b"), new StubRule(2)));
         var col = new Column(def, [a, b]);
         Assert.Equal(new ColumnKey("main"), col.Key);
-        Assert.Equal(2, col.Categories.Length);
+        Assert.Equal(2, col.Categories.Count);
         Assert.False(col.IsCompleted);
         Assert.Equal(0, col.Score);
     }
@@ -76,7 +76,7 @@ public sealed class ColumnTests
         var def = new ColumnDefinition(new ColumnKey("k"), new AllowAllPolicy(), SumScores);
         var a = new Category(new CategoryDefinition(new CategoryKey("a"), new StubRule(5)));
         var col = new Column(def, [a]);
-        Assert.Throws<ArgumentException>(() => col.Fill(DiceFactory.D6(1), new CategoryKey("missing")));
+        Assert.Throws<InvalidOperationException>(() => col.Fill(DiceFactory.D6(1), new CategoryKey("missing")));
     }
 
     [Fact]

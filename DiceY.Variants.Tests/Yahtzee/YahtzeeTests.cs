@@ -13,7 +13,7 @@ public sealed class YahtzeeTests
         => new(rng ?? new FixedRollService([]), def);
 
     private static YahtzeeState WithDice(YahtzeeState s, params int[] values)
-        => new(DiceFactory.D6(values), [.. s.Columns], s.RollCount);
+        => new([.. DiceFactory.D6(values)], s.Column, s.RollCount);
 
     private static ColumnKey MainColumn(YahtzeeEngine rs)
         => rs.Definition.ColumnDefinitions[0].Key;
@@ -68,8 +68,9 @@ public sealed class YahtzeeTests
     public void Roll_WhenMaxRollsReached_Throws()
     {
         var rs = CreateEngine(def: YahtzeeConfig.Build());
-        var s = new YahtzeeState(dice: rs.Create().Dice, columns: rs.Create().Columns, rollCount: rs.Definition.MaxRollsPerTurn);
-        Assert.Throws<InvalidOperationException>(() => rs.Reduce(s, new Roll(0b11111)));
+        var state = rs.Create();
+        var newState = new YahtzeeState(DiceArray: state.DiceArray, Column: state.Column, RollCount: rs.Definition.MaxRollsPerTurn);
+        Assert.Throws<InvalidOperationException>(() => rs.Reduce(newState, new Roll(0b11111)));
     }
 
     [Fact]
@@ -78,7 +79,7 @@ public sealed class YahtzeeTests
         var rs = CreateEngine(def: YahtzeeConfig.Build());
         var s = rs.Create();
         s = WithDice(s, 1, 1, 1, 4, 6);
-        s = new YahtzeeState(s.Dice, s.Columns, rollCount: 2);
+        s = new YahtzeeState(s.DiceArray, s.Column, RollCount: 2);
         var s2 = rs.Reduce(s, new Fill(MainColumn(rs), Key(rs, "ones")));
         var col = s2.Columns.Single();
         var cat = col.Categories.First(c => c.Key.Value == "ones");

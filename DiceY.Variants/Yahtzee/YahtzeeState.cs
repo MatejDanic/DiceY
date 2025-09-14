@@ -10,6 +10,6 @@ public sealed record YahtzeeState(
     int RollCount = 0
 ) : IGameState
 {
-    IReadOnlyList<Die> IGameState.Dice => DiceArray;
-    IReadOnlyList<Column> IGameState.Columns => [Column];
+    public IReadOnlyList<Die> Dice => DiceArray;
+    public IReadOnlyList<Column> Columns => [Column];
 }

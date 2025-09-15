@@ -9,10 +9,10 @@ public sealed class Die
 
     public Die(int sides = 6, int value = 6)
     {
-        ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(sides, 1, nameof(sides));
-        ArgumentOutOfRangeException.ThrowIfGreaterThanOrEqual(sides, 11, nameof(sides));
-        ArgumentOutOfRangeException.ThrowIfLessThan(value, 1, nameof(sides));
-        ArgumentOutOfRangeException.ThrowIfGreaterThan(value, sides, nameof(value));
+        ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(sides, 1);
+        ArgumentOutOfRangeException.ThrowIfGreaterThanOrEqual(sides, 11);
+        ArgumentOutOfRangeException.ThrowIfLessThan(value, 1);
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(value, sides);
         _sides = sides;
         Value = value;
     }
@@ -20,7 +20,8 @@ public sealed class Die
     public Die Roll(IRollService rng)
     {
         ArgumentNullException.ThrowIfNull(rng);
-        var newValue = rng.NextRoll(_sides);
-        return new Die(_sides, newValue);
+        return WithValue(rng.NextRoll(_sides));
     }
+
+    public Die WithValue(int value) => new(_sides, value);
 }

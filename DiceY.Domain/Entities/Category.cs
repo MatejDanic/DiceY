@@ -26,14 +26,14 @@ public sealed class Category
         Score = score;
     }
 
+    public bool CanFill => !Score.HasValue;
+
     public Category Fill(IReadOnlyList<Die> dice)
     {
         ArgumentNullException.ThrowIfNull(dice);
         if (Score.HasValue) throw new CategoryAlreadyScoredException(Key);
-        return new Category(
-            key: Key,
-            rule: _rule,
-            score: _rule.GetScore(dice)
-        );
+        return WithScore(_rule.GetScore(dice));
     }
+
+    public Category WithScore(int? score) => new(Key, _rule, score);
 }

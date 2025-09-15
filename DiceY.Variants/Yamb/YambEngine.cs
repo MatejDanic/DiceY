@@ -1,5 +1,4 @@
 ﻿using DiceY.Domain.Entities;
-using DiceY.Domain.Exceptions;
 using DiceY.Domain.Interfaces;
 using DiceY.Domain.Primitives;
 using DiceY.Domain.ValueObjects;
@@ -38,20 +37,20 @@ public sealed class YambEngine(IRollService rng, GameDefinition? definition = nu
         ArgumentNullException.ThrowIfNull(action);
         if (state.Columns.All(c => c.IsCompleted))
             throw new InvalidOperationException("Game already completed.");
-        var result = action switch
+        return action switch
         {
             Roll roll => ReduceRoll(state, roll.Mask),
             Announce announce => ReduceAnnounce(state, announce.CategoryKey),
             Fill fill => ReduceFill(state, fill.ColumnKey, fill.CategoryKey),
             _ => throw new NotSupportedException(action.GetType().Name)
         };
-        return result;
     }
 
     private YambState ReduceRoll(YambState state, int mask)
     {
         if ((mask >> Definition.DiceCount) != 0)
             throw new ArgumentOutOfRangeException(nameof(mask));
+
         var announcementColKey = Definition.ColumnDefinitions.First(cd => cd.Key.Value == "announcement").Key;
         var nonAnnHasOptions = state.Columns.Any(c => !c.Key.Equals(announcementColKey) && !c.IsCompleted);
         var annCol = state.Columns.First(c => c.Key.Equals(announcementColKey));
@@ -59,38 +58,44 @@ public sealed class YambEngine(IRollService rng, GameDefinition? definition = nu
         var announcementSet = state.Announcement.HasValue;
         if (!nonAnnHasOptions && annHasOptions && !announcementSet)
             throw new InvalidOperationException("Announcement required before rolling.");
+
         if (state.RollCount >= Definition.MaxRollsPerTurn)
             throw new InvalidOperationException("Max rolls per turn reached.");
-        var dice = state.Dice
+
+        var dice = state.DiceArray
             .Select((d, i) => ((mask >> i) & 1) == 1 ? d : d.Roll(rng))
             .ToImmutableArray();
-        return new YambState(dice, [.. state.Columns], state.RollCount + 1, state.Announcement);
+
+        return state.AfterRoll(dice);
     }
 
     private YambState ReduceAnnounce(YambState state, CategoryKey categoryKey)
     {
         if (state.RollCount != 0)
             throw new InvalidOperationException("Cannot announce after rolling.");
+
         var announcementColKey = Definition.ColumnDefinitions.First(cd => cd.Key.Value == "announcement").Key;
         var annCol = state.Columns.First(c => c.Key.Equals(announcementColKey));
         var alreadyScored = annCol.Categories.Any(c => c.Key.Equals(categoryKey) && c.Score.HasValue);
         if (alreadyScored)
             throw new InvalidOperationException("Category already scored in announcement column.");
-        return new YambState([.. state.Dice], [.. state.Columns], state.RollCount, categoryKey);
+
+        return state.AfterAnnounce(categoryKey);
     }
 
     private YambState ReduceFill(YambState state, ColumnKey columnKey, CategoryKey categoryKey)
     {
         var announcementColKey = Definition.ColumnDefinitions.First(cd => cd.Key.Value == "announcement").Key;
         var currentAnnouncement = state.Announcement;
+
         if (currentAnnouncement.HasValue && !columnKey.Equals(announcementColKey))
             throw new InvalidOperationException("Must score in announcement column.");
         if (currentAnnouncement.HasValue && !categoryKey.Equals(currentAnnouncement.Value))
             throw new InvalidOperationException("Must score announced category.");
 
-        var column = state.Columns.Where(c => c.Key == columnKey).First();
+        var column = state.GetColumn(columnKey);
         var updated = column.Fill(state.Dice, categoryKey);
-        var newColumns = state.ColumnsArray.SetItem(state.ColumnsArray.IndexOf(column), updated);
-        return state with { ColumnsArray = newColumns };
+
+        return state.AfterFill(columnKey, updated);
     }
 }

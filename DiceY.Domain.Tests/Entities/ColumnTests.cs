@@ -76,7 +76,7 @@ public sealed class ColumnTests
         var def = new ColumnDefinition(new ColumnKey("k"), new AllowAllPolicy(), SumScores);
         var a = new Category(new CategoryDefinition(new CategoryKey("a"), new StubRule(5)));
         var col = new Column(def, [a]);
-        Assert.Throws<InvalidOperationException>(() => col.Fill(DiceFactory.D6(1), new CategoryKey("missing")));
+        Assert.Throws<KeyNotFoundException>(() => col.Fill(DiceFactory.D6(1), new CategoryKey("missing")));
     }
 
     [Fact]

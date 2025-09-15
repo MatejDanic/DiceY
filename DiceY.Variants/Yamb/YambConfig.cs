@@ -15,6 +15,8 @@ public sealed record YambConfig
     private static readonly ColumnKey Free = new("free");
     private static readonly ColumnKey Announcement = new("announcement");
 
+    private static readonly ImmutableArray<ColumnKey> ColumnOrder = [Down, Up, Free, Announcement];
+
     private static readonly CategoryKey Ones = new("ones");
     private static readonly CategoryKey Twos = new("twos");
     private static readonly CategoryKey Threes = new("threes");
@@ -30,17 +32,13 @@ public sealed record YambConfig
     private static readonly CategoryKey Yamb = new("yamb");
 
     private static readonly ImmutableHashSet<CategoryKey> TopSection = [Ones, Twos, Threes, Fours, Fives, Sixes];
-
     private static readonly ImmutableHashSet<CategoryKey> BottomSection = [Trips, Straight, FullHouse, Poker, Yamb];
-
     private static readonly ImmutableArray<CategoryKey> CategoryOrder =
     [
         Ones, Twos, Threes, Fours, Fives, Sixes,
         Max, Min,
         Trips, Straight, FullHouse, Poker, Yamb
     ];
-
-    private static readonly ImmutableArray<ColumnKey> ColumnOrder = [Down, Up, Free, Announcement];
 
     private static readonly ImmutableDictionary<ColumnKey, IOrderPolicy> Policies =
         new Dictionary<ColumnKey, IOrderPolicy>

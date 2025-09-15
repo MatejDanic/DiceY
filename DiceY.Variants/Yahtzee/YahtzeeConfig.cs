@@ -10,6 +10,8 @@ namespace DiceY.Variants.Yahtzee;
 
 public sealed record YahtzeeConfig
 {
+    private static readonly ColumnKey Main = new("main");
+
     private static readonly CategoryKey Ones = new("ones");
     private static readonly CategoryKey Twos = new("twos");
     private static readonly CategoryKey Threes = new("threes");
@@ -24,9 +26,9 @@ public sealed record YahtzeeConfig
     private static readonly CategoryKey Yahtzee = new("yahtzee");
     private static readonly CategoryKey Chance = new("chance");
 
-    private static readonly ImmutableArray<CategoryKey> CategoryOrder = [Ones, Twos, Threes, Fours, Fives, Sixes, ThreeOfAKind, FourOfAKind, FullHouse, SmallStraight, LargeStraight, Yahtzee, Chance];
     private static readonly ImmutableHashSet<CategoryKey> TopSection = [Ones, Twos, Threes, Fours, Fives, Sixes];
     private static readonly ImmutableHashSet<CategoryKey> BottomSection = [ThreeOfAKind, FourOfAKind, FullHouse, SmallStraight, LargeStraight, Yahtzee, Chance];
+    private static readonly ImmutableArray<CategoryKey> CategoryOrder = [Ones, Twos, Threes, Fours, Fives, Sixes, ThreeOfAKind, FourOfAKind, FullHouse, SmallStraight, LargeStraight, Yahtzee, Chance];
 
     private const int FullHouseScore = 25;
     private const int SmallStraightScore = 30;
@@ -62,7 +64,7 @@ public sealed record YahtzeeConfig
 
     public static GameDefinition Build()
     {
-        var columnDefinition = new ColumnDefinition(new("main"), new Free(), CalculateScore);
+        var columnDefinition = new ColumnDefinition(Main, new Free(), CalculateScore);
         var categoryDefinitions = CategoryOrder.Select(key => new CategoryDefinition(key, Rules[key]));
         return new GameDefinition(
             DiceCount: 5,

@@ -72,7 +72,7 @@ public sealed class YambTests
     {
         var rs = CreateEngine(def: YambConfig.Build());
         var created = rs.Create();
-        var s = new YambState(created.DiceArray, created.ColumnsArray, RollCount: rs.Definition.MaxRollsPerTurn, Announcement: null);
+        var s = new YambState(created.DiceArray, created.ColumnsArray, rollCount: rs.Definition.MaxRollsPerTurn, announcement: null);
         Assert.Throws<InvalidOperationException>(() => rs.Reduce(s, new Roll(0b11111)));
     }
 

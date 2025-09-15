@@ -42,18 +42,17 @@ public sealed class YahtzeeEngine(IRollService rng, GameDefinition? definition =
             throw new ArgumentOutOfRangeException(nameof(mask));
         if (state.RollCount >= Definition.MaxRollsPerTurn)
             throw new InvalidOperationException("Max rolls per turn reached.");
-        var dice = state.Dice
+
+        var dice = state.DiceArray
             .Select((d, i) => ((mask >> i) & 1) == 1 ? d : d.Roll(rng))
             .ToImmutableArray();
-        return new YahtzeeState(dice, state.Column, state.RollCount + 1);
+
+        return state.AfterRoll(dice);
     }
 
     private YahtzeeState ReduceFill(YahtzeeState state, CategoryKey categoryKey)
     {
         var updated = state.Column.Fill(state.Dice, categoryKey);
-        var resetDice = Enumerable.Range(0, Definition.DiceCount)
-            .Select(_ => new Die(Definition.DiceSides))
-            .ToImmutableArray();
-        return new YahtzeeState(resetDice, updated);
+        return state.AfterFill(updated);
     }
 }
